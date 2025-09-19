@@ -1,0 +1,40 @@
+services:
+  postgres:
+
+    image: postgres:${POSTGRES_VERSION}
+    container_name: ${BASE_NAME}_postgres
+
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+
+    ports:
+      - ${BIND_ADDRESS}:${POSTGRES_PORT}:5432
+
+    volumes:
+      - ${POSTGRES_DATA_DIR}:/var/lib/postgresql/data
+
+  keycloak:
+
+    image: quay.io/keycloak/keycloak:${KEYCLOAK_VERSION}
+    container_name: ${BASE_NAME}_keycloak
+    command: start-dev
+
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_DATABASE: ${POSTGRES_DB}
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KC_BOOTSTRAP_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD}
+
+    ports:
+      - ${BIND_ADDRESS}:${KEYCLOAK_PORT}:8080
+
+    volumes:
+      - ${KEYCLOAK_DATA_DIR}:/opt/keycloak/data
+
+    depends_on:
+      - postgres
